@@ -1,14 +1,12 @@
 package com.emadabel.mydishes;
 
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuItem;
 
 import com.emadabel.mydishes.adapter.RecipesAdapter;
 import com.emadabel.mydishes.api.DownloaderAsyncTask;
@@ -17,19 +15,34 @@ import com.emadabel.mydishes.model.Recipe;
 import com.emadabel.mydishes.model.RecipeGetResponse;
 import com.emadabel.mydishes.model.RecipeSearchResponse;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity implements DownloaderAsyncTask.DownloaderCallback {
+
+    private static final String RECIPE_LIST_EXTRA = "recipes";
 
     @BindView(R.id.main_toolbar)
     Toolbar mainToolbar;
     @BindView(R.id.recipe_list_rv)
     RecyclerView recipeListRecyclerView;
 
+    private List<Recipe> recipeList;
+
     private AppDatabase mDb;
     private Recipe mRecipe;
     private RecipesAdapter mRecipesAdapter;
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (recipeList != null) {
+            outState.putParcelableArrayList(RECIPE_LIST_EXTRA, new ArrayList<>(recipeList));
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,40 +52,43 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
 
         setSupportActionBar(mainToolbar);
 
-        mDb = AppDatabase.getInstance(getApplicationContext());
+        //mDb = AppDatabase.getInstance(getApplicationContext());
 
-        mRecipesAdapter = new RecipesAdapter(this, null, null);
+        mRecipesAdapter = new RecipesAdapter(R.layout.recipe_list, this, null);
         recipeListRecyclerView.setHasFixedSize(true);
         recipeListRecyclerView.setAdapter(mRecipesAdapter);
 
+        if (savedInstanceState != null) {
+            recipeList = savedInstanceState.getParcelableArrayList(RECIPE_LIST_EXTRA);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (recipeList != null) {
+            mRecipesAdapter.setRecipeData(recipeList);
+            return;
+        }
         DownloaderAsyncTask service = new DownloaderAsyncTask(null, null, null, null);
         service.setListener(this);
         service.execute();
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        handleIntent(intent);
-    }
-
-    private void handleIntent(Intent intent) {
-
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            DownloaderAsyncTask service = new DownloaderAsyncTask(query, null, null, null);
-            service.setListener(this);
-            service.execute();
-        }
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_search) {
+            Intent intent = new Intent(MainActivity.this, SearchResultsActivity.class);
+            startActivity(intent);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /*@Override
@@ -102,7 +118,8 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
 
     @Override
     public void onRecipesFetched(RecipeSearchResponse recipeSearchResponse) {
-        mRecipesAdapter.setRecipeData(recipeSearchResponse.recipes);
+        recipeList = recipeSearchResponse.recipes;
+        mRecipesAdapter.setRecipeData(recipeList);
         /*String rId = recipeSearchResponse.recipes.get(0).getRecipeId();
         DownloaderAsyncTask service = new DownloaderAsyncTask(null, null, null, rId);
         service.setListener(this);

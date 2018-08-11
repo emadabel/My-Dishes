@@ -1,6 +1,7 @@
 package com.emadabel.mydishes.adapter;
 
 import android.content.Context;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -26,18 +27,19 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.RecipesV
     private RecipesAdapterOnClickHandler mClickHandler;
     private List<Recipe> mRecipeList;
     private Context mContext;
+    private int mLayoutResource;
 
-    public RecipesAdapter(Context mContext, RecipesAdapterOnClickHandler mClickHandler, List<Recipe> mRecipeList) {
+    public RecipesAdapter(@LayoutRes int resource, Context mContext, RecipesAdapterOnClickHandler mClickHandler) {
         this.mClickHandler = mClickHandler;
-        this.mRecipeList = mRecipeList;
         this.mContext = mContext;
+        this.mLayoutResource = resource;
     }
 
     @NonNull
     @Override
     public RecipesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(R.layout.recipe_list, parent, false);
+        View view = inflater.inflate(mLayoutResource, parent, false);
         return new RecipesViewHolder(view);
     }
 
