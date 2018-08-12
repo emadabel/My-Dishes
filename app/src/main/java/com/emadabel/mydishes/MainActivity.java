@@ -2,11 +2,13 @@ package com.emadabel.mydishes;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.emadabel.mydishes.adapter.RecipesAdapter;
 import com.emadabel.mydishes.api.DownloaderAsyncTask;
@@ -21,7 +23,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements DownloaderAsyncTask.DownloaderCallback {
+public class MainActivity extends AppCompatActivity implements DownloaderAsyncTask.DownloaderCallback, RecipesAdapter.RecipesAdapterOnClickHandler {
 
     private static final String RECIPE_LIST_EXTRA = "recipes";
 
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
     RecyclerView recipeListRecyclerView;
 
     private List<Recipe> recipeList;
+    private boolean backPressedTwice;
 
     private AppDatabase mDb;
     private Recipe mRecipe;
@@ -54,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
 
         //mDb = AppDatabase.getInstance(getApplicationContext());
 
-        mRecipesAdapter = new RecipesAdapter(R.layout.recipe_list, this, null);
+        mRecipesAdapter = new RecipesAdapter(R.layout.recipe_list, this, this);
         recipeListRecyclerView.setHasFixedSize(true);
         recipeListRecyclerView.setAdapter(mRecipesAdapter);
 
@@ -73,6 +76,22 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
         DownloaderAsyncTask service = new DownloaderAsyncTask(null, null, null, null);
         service.setListener(this);
         service.execute();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (backPressedTwice) {
+            super.onBackPressed();
+        } else {
+            Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show();
+            backPressedTwice = true;
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    backPressedTwice = false;
+                }
+            }, 3000);
+        }
     }
 
     @Override
@@ -137,4 +156,11 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
                 .into(posterImageView);*/
     }
 
+    @Override
+    public void onClick(String rId, String recipeTitle) {
+        Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
+        intent.putExtra(DetailsActivity.DETAILS_RECIPE_ID_EXTRA, rId);
+        intent.putExtra(DetailsActivity.DETAILS_RECIPE_TITLE_EXTRA, recipeTitle);
+        startActivity(intent);
+    }
 }

@@ -73,7 +73,7 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.RecipesV
     }
 
     public interface RecipesAdapterOnClickHandler {
-        void onClick(String rId);
+        void onClick(String rId, String recipeTitle);
     }
 
     public class RecipesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -97,7 +97,8 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.RecipesV
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();
             String recipeId = mRecipeList.get(adapterPosition).getRecipeId();
-            //mClickHandler.onClick(recipeId);
+            String recipeTitle = mRecipeList.get(adapterPosition).getTitle();
+            mClickHandler.onClick(recipeId, recipeTitle);
         }
     }
 }

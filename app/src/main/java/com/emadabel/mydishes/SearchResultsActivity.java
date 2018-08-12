@@ -25,7 +25,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class SearchResultsActivity extends AppCompatActivity implements DownloaderAsyncTask.DownloaderCallback {
+public class SearchResultsActivity extends AppCompatActivity implements DownloaderAsyncTask.DownloaderCallback, RecipesAdapter.RecipesAdapterOnClickHandler {
 
     private static final String SEARCH_QUERY_EXTRA = "query";
     private static final String SEARCH_FOCUS_EXTRA = "focus";
@@ -36,6 +36,7 @@ public class SearchResultsActivity extends AppCompatActivity implements Download
     @BindView(R.id.search_result_rv)
     RecyclerView searchResultRecyclerView;
     SearchView searchView;
+
     private List<Recipe> recipeList;
     private String mQuery;
     private boolean mIsFocused = true;
@@ -64,7 +65,7 @@ public class SearchResultsActivity extends AppCompatActivity implements Download
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        mRecipesAdapter = new RecipesAdapter(R.layout.search_list, this, null);
+        mRecipesAdapter = new RecipesAdapter(R.layout.search_list, this, this);
         searchResultRecyclerView.setHasFixedSize(true);
         searchResultRecyclerView.setAdapter(mRecipesAdapter);
 
@@ -133,7 +134,7 @@ public class SearchResultsActivity extends AppCompatActivity implements Download
                 mIsFocused = hasFocus;
             }
         });
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -161,5 +162,13 @@ public class SearchResultsActivity extends AppCompatActivity implements Download
     @Override
     public void onRecipeFetched(RecipeGetResponse recipeResponse) {
 
+    }
+
+    @Override
+    public void onClick(String rId, String recipeTitle) {
+        Intent intent = new Intent(SearchResultsActivity.this, DetailsActivity.class);
+        intent.putExtra(DetailsActivity.DETAILS_RECIPE_ID_EXTRA, rId);
+        intent.putExtra(DetailsActivity.DETAILS_RECIPE_TITLE_EXTRA, recipeTitle);
+        startActivity(intent);
     }
 }
