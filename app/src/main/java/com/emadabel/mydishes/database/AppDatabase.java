@@ -7,7 +7,9 @@ import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
 import android.util.Log;
 
-@Database(entities = {RecipeEntry.class}, version = 1, exportSchema = false)
+import com.emadabel.mydishes.model.Recipe;
+
+@Database(entities = {Recipe.class}, version = 1, exportSchema = false)
 @TypeConverters(IngredientsConverter.class)
 public abstract class AppDatabase extends RoomDatabase {
 

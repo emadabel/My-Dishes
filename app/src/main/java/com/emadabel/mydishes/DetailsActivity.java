@@ -1,18 +1,20 @@
 package com.emadabel.mydishes;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Intent;
-import android.media.Image;
 import android.net.Uri;
-import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -20,12 +22,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.emadabel.mydishes.api.DownloaderAsyncTask;
+import com.emadabel.mydishes.database.AppDatabase;
+import com.emadabel.mydishes.database.AppExecutors;
 import com.emadabel.mydishes.model.Recipe;
 import com.emadabel.mydishes.model.RecipeGetResponse;
 import com.emadabel.mydishes.model.RecipeSearchResponse;
 import com.github.paolorotolo.expandableheightlistview.ExpandableHeightListView;
-
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -34,6 +36,9 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
 
     public static final String DETAILS_RECIPE_ID_EXTRA = "recipe_id";
     public static final String DETAILS_RECIPE_TITLE_EXTRA = "recipe_title";
+    public static final String DETAILS_ID_INSTANCE = "id";
+    private static final String TAG = "DetailsActivity";
+    private static final int DEFAULT_ID = -1;
 
     @BindView(R.id.details_collapsing_layout)
     CollapsingToolbarLayout detailsCollapsingLayout;
@@ -49,8 +54,19 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
     ExpandableHeightListView ingredientsListView;
     @BindView(R.id.publisher_tv)
     TextView publisherTextView;
+    @BindView(R.id.favorites_fab)
+    FloatingActionButton favoritesFab;
 
     private Recipe recipeDetails;
+    private int mId = DEFAULT_ID;
+
+    private AppDatabase mDb;
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt(DETAILS_ID_INSTANCE, mId);
+        super.onSaveInstanceState(outState);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,11 +81,42 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
             getSupportActionBar().setDisplayShowTitleEnabled(true);
         }
 
-        String rId = getIntent().getStringExtra(DETAILS_RECIPE_ID_EXTRA);
-        String title = getIntent().getStringExtra(DETAILS_RECIPE_TITLE_EXTRA);
+        mDb = AppDatabase.getInstance(getApplicationContext());
 
-        detailsCollapsingLayout.setTitle(title);
+        if (savedInstanceState != null && savedInstanceState.containsKey(DETAILS_ID_INSTANCE)) {
+            mId = savedInstanceState.getInt(DETAILS_ID_INSTANCE, DEFAULT_ID);
+        }
 
+        initViews();
+
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra(DETAILS_RECIPE_ID_EXTRA)) {
+            final String rId = getIntent().getStringExtra(DETAILS_RECIPE_ID_EXTRA);
+            String title = getIntent().getStringExtra(DETAILS_RECIPE_TITLE_EXTRA);
+
+            detailsCollapsingLayout.setTitle(title);
+
+            final LiveData<Recipe> recipeLiveData = mDb.recipeDao().loadRecipeById(rId);
+            recipeLiveData.observe(this, new Observer<Recipe>() {
+                @Override
+                public void onChanged(@Nullable Recipe recipe) {
+                    if (recipe != null) {
+                        Log.d(TAG, "loading data from favorites and isFavorite=true");
+                        recipeDetails = recipe;
+                        mId = recipe.getId();
+                        populateUi(recipe);
+                    } else {
+                        Log.d(TAG, "Loading data from network and isFavorite=false");
+                        DownloaderAsyncTask service = new DownloaderAsyncTask(null, null, null, rId);
+                        service.setListener(DetailsActivity.this);
+                        service.execute();
+                    }
+                }
+            });
+        }
+    }
+
+    private void initViews() {
         sourceTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -86,9 +133,25 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
             }
         });
 
-        DownloaderAsyncTask service = new DownloaderAsyncTask(null, null, null, rId);
-        service.setListener(this);
-        service.execute();
+        favoritesFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mId == DEFAULT_ID) {
+                            Log.d(TAG, "Add recipe to favorites");
+                            mDb.recipeDao().insertFavoriteItem(recipeDetails);
+                        } else {
+                            Log.d(TAG, "Remove recipe from favorites");
+                            recipeDetails.setId(mId);
+                            mDb.recipeDao().deleteFavoriteItem(recipeDetails);
+                            mId = DEFAULT_ID;
+                        }
+                    }
+                });
+            }
+        });
     }
 
     @Override
@@ -114,9 +177,17 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
     @Override
     public void onRecipeFetched(RecipeGetResponse recipeResponse) {
         recipeDetails = recipeResponse.getRecipe();
-        String posterUrl = recipeDetails.getImageUrl();
-        String publisher = recipeDetails.getPublisher();
-        double rank = recipeDetails.getSocialRank();
+        populateUi(recipeDetails);
+    }
+
+    private void populateUi(Recipe recipe) {
+        if (recipe == null) {
+            return;
+        }
+
+        String posterUrl = recipe.getImageUrl();
+        String publisher = recipe.getPublisher();
+        double rank = recipe.getSocialRank();
 
         Glide.with(this)
                 .load(posterUrl)
@@ -126,7 +197,7 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
 
         ranking.setRating((float) (rank * 0.05));
 
-        ingredientsListView.setAdapter(new ArrayAdapter<>(this, R.layout.ingredients_list, R.id.ingredient_item_tv, recipeDetails.getIngredients()));
+        ingredientsListView.setAdapter(new ArrayAdapter<>(this, R.layout.ingredients_list, R.id.ingredient_item_tv, recipe.getIngredients()));
         ingredientsListView.setExpanded(true);
 
         publisherTextView.setText(publisher);

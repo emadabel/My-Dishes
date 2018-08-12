@@ -1,5 +1,8 @@
 package com.emadabel.mydishes.model;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -7,6 +10,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
+@Entity(tableName = "favorites")
 public class Recipe implements Parcelable {
     public static final Creator<Recipe> CREATOR = new Creator<Recipe>() {
         @Override
@@ -19,6 +23,9 @@ public class Recipe implements Parcelable {
             return new Recipe[size];
         }
     };
+
+    @PrimaryKey(autoGenerate = true)
+    private int id;
     @SerializedName("publisher")
     private String publisher;
     @SerializedName("f2f_url")
@@ -39,6 +46,7 @@ public class Recipe implements Parcelable {
     private String title;
 
     private Recipe(Parcel in) {
+        id = in.readInt();
         publisher = in.readString();
         f2fUrl = in.readString();
         ingredients = in.createStringArrayList();
@@ -52,6 +60,40 @@ public class Recipe implements Parcelable {
         }
         publisherUrl = in.readString();
         title = in.readString();
+    }
+
+    @Ignore
+    public Recipe(String publisher, String f2fUrl, List<String> ingredients, String sourceUrl, String recipeId, String imageUrl, Double socialRank, String publisherUrl, String title) {
+        this.publisher = publisher;
+        this.f2fUrl = f2fUrl;
+        this.ingredients = ingredients;
+        this.sourceUrl = sourceUrl;
+        this.recipeId = recipeId;
+        this.imageUrl = imageUrl;
+        this.socialRank = socialRank;
+        this.publisherUrl = publisherUrl;
+        this.title = title;
+    }
+
+    public Recipe(int id, String publisher, String f2fUrl, List<String> ingredients, String sourceUrl, String recipeId, String imageUrl, Double socialRank, String publisherUrl, String title) {
+        this.id = id;
+        this.publisher = publisher;
+        this.f2fUrl = f2fUrl;
+        this.ingredients = ingredients;
+        this.sourceUrl = sourceUrl;
+        this.recipeId = recipeId;
+        this.imageUrl = imageUrl;
+        this.socialRank = socialRank;
+        this.publisherUrl = publisherUrl;
+        this.title = title;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getPublisher() {
@@ -97,6 +139,7 @@ public class Recipe implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
         dest.writeString(publisher);
         dest.writeString(f2fUrl);
         dest.writeString(title);

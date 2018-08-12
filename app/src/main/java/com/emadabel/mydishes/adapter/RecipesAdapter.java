@@ -72,6 +72,10 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.RecipesV
         notifyDataSetChanged();
     }
 
+    public List<Recipe> getRecipeList() {
+        return mRecipeList;
+    }
+
     public interface RecipesAdapterOnClickHandler {
         void onClick(String rId, String recipeTitle);
     }

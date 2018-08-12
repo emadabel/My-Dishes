@@ -27,9 +27,9 @@ import butterknife.ButterKnife;
 
 public class SearchResultsActivity extends AppCompatActivity implements DownloaderAsyncTask.DownloaderCallback, RecipesAdapter.RecipesAdapterOnClickHandler {
 
-    private static final String SEARCH_QUERY_EXTRA = "query";
-    private static final String SEARCH_FOCUS_EXTRA = "focus";
-    private static final String SEARCH_RESULT_EXTRA = "result";
+    private static final String SEARCH_QUERY_INSTANCE = "query";
+    private static final String SEARCH_FOCUS_INSTANCE = "focus";
+    private static final String SEARCH_RESULT_INSTANCE = "result";
 
     @BindView(R.id.search_toolbar)
     Toolbar searchToolbar;
@@ -44,12 +44,12 @@ public class SearchResultsActivity extends AppCompatActivity implements Download
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString(SEARCH_QUERY_EXTRA, mQuery);
-        outState.putBoolean(SEARCH_FOCUS_EXTRA, mIsFocused);
+        outState.putString(SEARCH_QUERY_INSTANCE, mQuery);
+        outState.putBoolean(SEARCH_FOCUS_INSTANCE, mIsFocused);
         if (recipeList != null) {
-            outState.putParcelableArrayList(SEARCH_RESULT_EXTRA, new ArrayList<>(recipeList));
+            outState.putParcelableArrayList(SEARCH_RESULT_INSTANCE, new ArrayList<>(recipeList));
         }
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -70,9 +70,9 @@ public class SearchResultsActivity extends AppCompatActivity implements Download
         searchResultRecyclerView.setAdapter(mRecipesAdapter);
 
         if (savedInstanceState != null) {
-            mQuery = savedInstanceState.getString(SEARCH_QUERY_EXTRA);
-            mIsFocused = savedInstanceState.getBoolean(SEARCH_FOCUS_EXTRA);
-            recipeList = savedInstanceState.getParcelableArrayList(SEARCH_RESULT_EXTRA);
+            mQuery = savedInstanceState.getString(SEARCH_QUERY_INSTANCE);
+            mIsFocused = savedInstanceState.getBoolean(SEARCH_FOCUS_INSTANCE);
+            recipeList = savedInstanceState.getParcelableArrayList(SEARCH_RESULT_INSTANCE);
         }
     }
 
