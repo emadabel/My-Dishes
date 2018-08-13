@@ -1,13 +1,15 @@
 package com.emadabel.mydishes;
 
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -37,9 +39,12 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
     public static final String DETAILS_RECIPE_ID_EXTRA = "recipe_id";
     public static final String DETAILS_RECIPE_TITLE_EXTRA = "recipe_title";
     public static final String DETAILS_ID_INSTANCE = "id";
+    public static final String DETAILS_RECIPE_INSTANCE = "recipe";
     private static final String TAG = "DetailsActivity";
     private static final int DEFAULT_ID = -1;
 
+    @BindView(R.id.details_coordinator_layout)
+    CoordinatorLayout detailsCoordinatorLayout;
     @BindView(R.id.details_collapsing_layout)
     CollapsingToolbarLayout detailsCollapsingLayout;
     @BindView(R.id.details_toolbar)
@@ -65,6 +70,9 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt(DETAILS_ID_INSTANCE, mId);
+        if (recipeDetails != null) {
+            outState.putParcelable(DETAILS_RECIPE_INSTANCE, recipeDetails);
+        }
         super.onSaveInstanceState(outState);
     }
 
@@ -83,8 +91,10 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
 
         mDb = AppDatabase.getInstance(getApplicationContext());
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(DETAILS_ID_INSTANCE)) {
+        if (savedInstanceState != null && (savedInstanceState.containsKey(DETAILS_ID_INSTANCE)
+                || savedInstanceState.containsKey(DETAILS_RECIPE_INSTANCE))) {
             mId = savedInstanceState.getInt(DETAILS_ID_INSTANCE, DEFAULT_ID);
+            recipeDetails = savedInstanceState.getParcelable(DETAILS_RECIPE_INSTANCE);
         }
 
         initViews();
@@ -96,8 +106,9 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
 
             detailsCollapsingLayout.setTitle(title);
 
-            final LiveData<Recipe> recipeLiveData = mDb.recipeDao().loadRecipeById(rId);
-            recipeLiveData.observe(this, new Observer<Recipe>() {
+            DetailsViewModelFactory factory = new DetailsViewModelFactory(mDb, rId);
+            DetailsViewModel viewModel = ViewModelProviders.of(this, factory).get(DetailsViewModel.class);
+            viewModel.getRecipe().observe(this, new Observer<Recipe>() {
                 @Override
                 public void onChanged(@Nullable Recipe recipe) {
                     if (recipe != null) {
@@ -107,9 +118,13 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
                         populateUi(recipe);
                     } else {
                         Log.d(TAG, "Loading data from network and isFavorite=false");
-                        DownloaderAsyncTask service = new DownloaderAsyncTask(null, null, null, rId);
-                        service.setListener(DetailsActivity.this);
-                        service.execute();
+                        if (recipeDetails == null) {
+                            DownloaderAsyncTask service = new DownloaderAsyncTask(null, null, null, rId);
+                            service.setListener(DetailsActivity.this);
+                            service.execute();
+                        } else {
+                            populateUi(recipeDetails);
+                        }
                     }
                 }
             });
@@ -142,11 +157,13 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
                         if (mId == DEFAULT_ID) {
                             Log.d(TAG, "Add recipe to favorites");
                             mDb.recipeDao().insertFavoriteItem(recipeDetails);
+                            Snackbar.make(detailsCoordinatorLayout, "Recipe added to favorites", Snackbar.LENGTH_SHORT).show();
                         } else {
                             Log.d(TAG, "Remove recipe from favorites");
                             recipeDetails.setId(mId);
                             mDb.recipeDao().deleteFavoriteItem(recipeDetails);
                             mId = DEFAULT_ID;
+                            Snackbar.make(detailsCoordinatorLayout, "Recipe removed from favorites", Snackbar.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -183,6 +200,12 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
     private void populateUi(Recipe recipe) {
         if (recipe == null) {
             return;
+        }
+
+        if (mId == DEFAULT_ID) {
+            favoritesFab.setImageResource(R.drawable.ic_fav_off);
+        } else {
+            favoritesFab.setImageResource(R.drawable.ic_fav_on);
         }
 
         String posterUrl = recipe.getImageUrl();

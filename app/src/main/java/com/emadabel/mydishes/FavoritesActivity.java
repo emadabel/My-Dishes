@@ -1,7 +1,7 @@
 package com.emadabel.mydishes;
 
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -42,7 +42,7 @@ public class FavoritesActivity extends AppCompatActivity implements RecipesAdapt
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
+            getSupportActionBar().setDisplayShowTitleEnabled(true);
         }
 
         mRecipesAdapter = new RecipesAdapter(R.layout.search_list, this, this);
@@ -69,12 +69,12 @@ public class FavoritesActivity extends AppCompatActivity implements RecipesAdapt
         }).attachToRecyclerView(favoritesRecyclerView);
 
         mDb = AppDatabase.getInstance(getApplicationContext());
-        retriveRecipes();
+        setupViewModel();
     }
 
-    private void retriveRecipes() {
-        final LiveData<List<Recipe>> recipe = mDb.recipeDao().loadAllFavorites();
-        recipe.observe(this, new Observer<List<Recipe>>() {
+    private void setupViewModel() {
+        FavoritesViewModel viewModel = ViewModelProviders.of(this).get(FavoritesViewModel.class);
+        viewModel.getRecipes().observe(this, new Observer<List<Recipe>>() {
             @Override
             public void onChanged(@Nullable List<Recipe> recipes) {
                 mRecipesAdapter.setRecipeData(recipes);

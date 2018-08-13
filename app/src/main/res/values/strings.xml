@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">My Dishes</string>
+    <string name="favorites_title">Favorites</string>
     <string name="search_hint">Recipe name or ingredients separated with comma</string>
     <string name="action_search">Search</string>
 </resources>

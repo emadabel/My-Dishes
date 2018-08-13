@@ -44,6 +44,7 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".FavoritesActivity"
+            android:label="@string/favorites_title"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar" />
     </application>
