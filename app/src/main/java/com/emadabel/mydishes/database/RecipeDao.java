@@ -29,4 +29,7 @@ public interface RecipeDao {
 
     @Query("SELECT * FROM favorites WHERE recipeId = :rId")
     LiveData<Recipe> loadRecipeById(String rId);
+
+    @Query("SELECT * FROM favorites")
+    List<Recipe> loadFavoritesForWidget();
 }

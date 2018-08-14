@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -15,6 +16,7 @@ import com.emadabel.mydishes.adapter.RecipesAdapter;
 import com.emadabel.mydishes.database.AppDatabase;
 import com.emadabel.mydishes.database.AppExecutors;
 import com.emadabel.mydishes.model.Recipe;
+import com.emadabel.mydishes.widget.UpdatingWidgetService;
 
 import java.util.List;
 
@@ -63,6 +65,7 @@ public class FavoritesActivity extends AppCompatActivity implements RecipesAdapt
                         int position = viewHolder.getAdapterPosition();
                         List<Recipe> recipes = mRecipesAdapter.getRecipeList();
                         mDb.recipeDao().deleteFavoriteItem(recipes.get(position));
+                        UpdatingWidgetService.startActionUpdateWidgets(getBaseContext());
                     }
                 });
             }
@@ -86,8 +89,10 @@ public class FavoritesActivity extends AppCompatActivity implements RecipesAdapt
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == android.R.id.home)
-            onBackPressed();
+        if (id == android.R.id.home) {
+            NavUtils.navigateUpFromSameTask(this);
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 

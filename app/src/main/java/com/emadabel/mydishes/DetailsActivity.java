@@ -10,6 +10,7 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -29,6 +30,7 @@ import com.emadabel.mydishes.database.AppExecutors;
 import com.emadabel.mydishes.model.Recipe;
 import com.emadabel.mydishes.model.RecipeGetResponse;
 import com.emadabel.mydishes.model.RecipeSearchResponse;
+import com.emadabel.mydishes.widget.UpdatingWidgetService;
 import com.github.paolorotolo.expandableheightlistview.ExpandableHeightListView;
 
 import butterknife.BindView;
@@ -165,6 +167,7 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
                             mId = DEFAULT_ID;
                             Snackbar.make(detailsCoordinatorLayout, "Recipe removed from favorites", Snackbar.LENGTH_SHORT).show();
                         }
+                        UpdatingWidgetService.startActionUpdateWidgets(getBaseContext());
                     }
                 });
             }
@@ -175,8 +178,10 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == android.R.id.home)
-            onBackPressed();
+        if (id == android.R.id.home) {
+            NavUtils.navigateUpFromSameTask(this);
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 

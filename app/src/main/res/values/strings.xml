@@ -3,4 +3,6 @@
     <string name="favorites_title">Favorites</string>
     <string name="search_hint">Recipe name or ingredients separated with comma</string>
     <string name="action_search">Search</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>

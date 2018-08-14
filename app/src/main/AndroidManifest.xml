@@ -40,13 +40,37 @@
         </activity>
         <activity
             android:name=".DetailsActivity"
-            android:launchMode="singleTop"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:parentActivityName=".FavoritesActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".FavoritesActivity" />
+        </activity>
         <activity
             android:name=".FavoritesActivity"
             android:label="@string/favorites_title"
-            android:launchMode="singleTop"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+
+        <receiver android:name=".widget.FavoritesWidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/favorites_widget_provider_info" />
+        </receiver>
+
+        <service
+            android:name=".widget.ListViewWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <service android:name=".widget.UpdatingWidgetService" />
     </application>
 
 </manifest>
