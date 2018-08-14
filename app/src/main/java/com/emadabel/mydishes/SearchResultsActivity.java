@@ -15,6 +15,7 @@ import android.view.View;
 
 import com.emadabel.mydishes.adapter.RecipesAdapter;
 import com.emadabel.mydishes.api.DownloaderAsyncTask;
+import com.emadabel.mydishes.firebase.Analytics;
 import com.emadabel.mydishes.model.Recipe;
 import com.emadabel.mydishes.model.RecipeGetResponse;
 import com.emadabel.mydishes.model.RecipeSearchResponse;
@@ -92,6 +93,9 @@ public class SearchResultsActivity extends AppCompatActivity implements Download
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
+
+            Analytics.logEventSearch(this, query);
+
             DownloaderAsyncTask service = new DownloaderAsyncTask(query, null, null, null);
             service.setListener(this);
             service.execute();
