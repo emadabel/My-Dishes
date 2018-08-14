@@ -1,17 +1,28 @@
 package com.emadabel.mydishes;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.emadabel.mydishes.adapter.RecipesAdapter;
 import com.emadabel.mydishes.api.DownloaderAsyncTask;
+import com.emadabel.mydishes.api.NetworkState;
 import com.emadabel.mydishes.model.Recipe;
 import com.emadabel.mydishes.model.RecipeGetResponse;
 import com.emadabel.mydishes.model.RecipeSearchResponse;
@@ -25,19 +36,29 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements DownloaderAsyncTask.DownloaderCallback, RecipesAdapter.RecipesAdapterOnClickHandler {
+public class MainActivity extends AppCompatActivity implements DownloaderAsyncTask.DownloaderCallback,
+        RecipesAdapter.RecipesAdapterOnClickHandler {
 
     private static final String RECIPE_LIST_INSTANCE = "recipes";
-
+    private static final String CONNECTIVITY_STATE_INSTANCE = "connectivity";
+    @BindView(R.id.main_activity_layout)
+    CoordinatorLayout mainActivityLayout;
     @BindView(R.id.main_toolbar)
     Toolbar mainToolbar;
     @BindView(R.id.recipe_list_rv)
     RecyclerView recipeListRecyclerView;
+    @BindView(R.id.loading_indicator_pb)
+    ProgressBar loadingIndicatorProgressBar;
+    @BindView(R.id.offline_frame)
+    FrameLayout offline_frame;
+    @BindView(R.id.retry_button)
+    Button retryButton;
     @BindView(R.id.adView)
     AdView mAdView;
-
+    private BroadcastReceiver receiver;
     private List<Recipe> recipeList;
     private boolean backPressedTwice;
+    private boolean mIsConnected;
 
     private RecipesAdapter mRecipesAdapter;
 
@@ -46,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
         if (recipeList != null) {
             outState.putParcelableArrayList(RECIPE_LIST_INSTANCE, new ArrayList<>(recipeList));
         }
+        outState.putBoolean(CONNECTIVITY_STATE_INSTANCE, mIsConnected);
         super.onSaveInstanceState(outState);
     }
 
@@ -56,6 +78,37 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
         ButterKnife.bind(this);
 
         setSupportActionBar(mainToolbar);
+
+        if (savedInstanceState != null) {
+            mIsConnected = savedInstanceState.getBoolean(CONNECTIVITY_STATE_INSTANCE);
+            if (savedInstanceState.containsKey(RECIPE_LIST_INSTANCE)) {
+                recipeList = savedInstanceState.getParcelableArrayList(RECIPE_LIST_INSTANCE);
+            }
+        } else {
+            mIsConnected = NetworkState.isConnected(this);
+        }
+
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (!mIsConnected && NetworkState.isConnected(context)) {
+                    Snackbar.make(mainActivityLayout, "Back online", Snackbar.LENGTH_SHORT).show();
+                } else if (!NetworkState.isConnected(context)) {
+                    Snackbar.make(mainActivityLayout, "No connection", Snackbar.LENGTH_INDEFINITE).show();
+                }
+                mIsConnected = NetworkState.isConnected(context);
+                ;
+            }
+        };
+
+        registerReceiver(receiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
+        retryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadDataTask();
+            }
+        });
 
         MobileAds.initialize(this,
                 "ca-app-pub-3940256099942544~3347511713");
@@ -68,22 +121,40 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
         mRecipesAdapter = new RecipesAdapter(R.layout.recipe_list, this, this);
         recipeListRecyclerView.setHasFixedSize(true);
         recipeListRecyclerView.setAdapter(mRecipesAdapter);
-
-        if (savedInstanceState != null && savedInstanceState.containsKey(RECIPE_LIST_INSTANCE)) {
-            recipeList = savedInstanceState.getParcelableArrayList(RECIPE_LIST_INSTANCE);
-        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         if (recipeList != null) {
+            loadingIndicatorProgressBar.setVisibility(View.INVISIBLE);
+            recipeListRecyclerView.setVisibility(View.VISIBLE);
+            offline_frame.setVisibility(View.INVISIBLE);
             mRecipesAdapter.setRecipeData(recipeList);
-            return;
+        } else {
+            loadDataTask();
         }
-        DownloaderAsyncTask service = new DownloaderAsyncTask(null, null, null, null);
-        service.setListener(this);
-        service.execute();
+    }
+
+    private void loadDataTask() {
+        if (!mIsConnected) {
+            loadingIndicatorProgressBar.setVisibility(View.INVISIBLE);
+            recipeListRecyclerView.setVisibility(View.INVISIBLE);
+            offline_frame.setVisibility(View.VISIBLE);
+        } else {
+            loadingIndicatorProgressBar.setVisibility(View.VISIBLE);
+            recipeListRecyclerView.setVisibility(View.INVISIBLE);
+            offline_frame.setVisibility(View.INVISIBLE);
+            DownloaderAsyncTask service = new DownloaderAsyncTask(null, null, null, null);
+            service.setListener(this);
+            service.execute();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(receiver);
     }
 
     @Override
@@ -123,6 +194,9 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
 
     @Override
     public void onRecipesFetched(RecipeSearchResponse recipeSearchResponse) {
+        loadingIndicatorProgressBar.setVisibility(View.INVISIBLE);
+        recipeListRecyclerView.setVisibility(View.VISIBLE);
+        offline_frame.setVisibility(View.INVISIBLE);
         recipeList = recipeSearchResponse.recipes;
         mRecipesAdapter.setRecipeData(recipeList);
     }
