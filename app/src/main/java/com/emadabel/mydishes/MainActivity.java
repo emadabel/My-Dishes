@@ -15,6 +15,9 @@ import com.emadabel.mydishes.api.DownloaderAsyncTask;
 import com.emadabel.mydishes.model.Recipe;
 import com.emadabel.mydishes.model.RecipeGetResponse;
 import com.emadabel.mydishes.model.RecipeSearchResponse;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +33,8 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
     Toolbar mainToolbar;
     @BindView(R.id.recipe_list_rv)
     RecyclerView recipeListRecyclerView;
+    @BindView(R.id.adView)
+    AdView mAdView;
 
     private List<Recipe> recipeList;
     private boolean backPressedTwice;
@@ -51,6 +56,14 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
         ButterKnife.bind(this);
 
         setSupportActionBar(mainToolbar);
+
+        MobileAds.initialize(this,
+                "ca-app-pub-3940256099942544~3347511713");
+
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .build();
+        mAdView.loadAd(adRequest);
 
         mRecipesAdapter = new RecipesAdapter(R.layout.recipe_list, this, this);
         recipeListRecyclerView.setHasFixedSize(true);
