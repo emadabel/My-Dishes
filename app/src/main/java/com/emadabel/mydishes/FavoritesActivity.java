@@ -5,12 +5,16 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import com.emadabel.mydishes.adapter.RecipesAdapter;
 import com.emadabel.mydishes.database.AppDatabase;
@@ -25,10 +29,14 @@ import butterknife.ButterKnife;
 
 public class FavoritesActivity extends AppCompatActivity implements RecipesAdapter.RecipesAdapterOnClickHandler {
 
+    @BindView(R.id.favorites_activity_layout)
+    CoordinatorLayout favoritesActivityLayout;
     @BindView(R.id.favorites_toolbar)
     Toolbar favoritesToolbar;
     @BindView(R.id.favorites_list_rv)
     RecyclerView favoritesRecyclerView;
+    @BindView(R.id.no_favorite_tv)
+    TextView noFavoriteTextView;
 
     private RecipesAdapter mRecipesAdapter;
 
@@ -66,6 +74,7 @@ public class FavoritesActivity extends AppCompatActivity implements RecipesAdapt
                         List<Recipe> recipes = mRecipesAdapter.getRecipeList();
                         mDb.recipeDao().deleteFavoriteItem(recipes.get(position));
                         UpdatingWidgetService.startActionUpdateWidgets(getBaseContext());
+                        Snackbar.make(favoritesActivityLayout, R.string.snake_message_remove_fav, Snackbar.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -80,7 +89,14 @@ public class FavoritesActivity extends AppCompatActivity implements RecipesAdapt
         viewModel.getRecipes().observe(this, new Observer<List<Recipe>>() {
             @Override
             public void onChanged(@Nullable List<Recipe> recipes) {
-                mRecipesAdapter.setRecipeData(recipes);
+                if (recipes == null || recipes.size() == 0) {
+                    favoritesRecyclerView.setVisibility(View.INVISIBLE);
+                    noFavoriteTextView.setVisibility(View.VISIBLE);
+                } else {
+                    favoritesRecyclerView.setVisibility(View.VISIBLE);
+                    noFavoriteTextView.setVisibility(View.INVISIBLE);
+                    mRecipesAdapter.setRecipeData(recipes);
+                }
             }
         });
     }

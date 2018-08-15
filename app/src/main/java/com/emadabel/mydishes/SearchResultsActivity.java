@@ -1,9 +1,14 @@
 package com.emadabel.mydishes;
 
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -12,9 +17,14 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.emadabel.mydishes.adapter.RecipesAdapter;
 import com.emadabel.mydishes.api.DownloaderAsyncTask;
+import com.emadabel.mydishes.api.NetworkState;
 import com.emadabel.mydishes.firebase.Analytics;
 import com.emadabel.mydishes.model.Recipe;
 import com.emadabel.mydishes.model.RecipeGetResponse;
@@ -31,22 +41,37 @@ public class SearchResultsActivity extends AppCompatActivity implements Download
     private static final String SEARCH_QUERY_INSTANCE = "query";
     private static final String SEARCH_FOCUS_INSTANCE = "focus";
     private static final String SEARCH_RESULT_INSTANCE = "result";
+    private static final String CONNECTIVITY_STATE_INSTANCE = "connectivity";
 
+    @BindView(R.id.search_activity_layout)
+    CoordinatorLayout searchActivityLayout;
     @BindView(R.id.search_toolbar)
     Toolbar searchToolbar;
     @BindView(R.id.search_result_rv)
     RecyclerView searchResultRecyclerView;
+    @BindView(R.id.loading_indicator_pb)
+    ProgressBar loadingIndicatorProgressBar;
+    @BindView(R.id.offline_frame)
+    FrameLayout offlineFrame;
+    @BindView(R.id.retry_button)
+    Button retryButton;
+    @BindView(R.id.search_hint_tv)
+    TextView searchHintTextView;
     SearchView searchView;
 
+    private BroadcastReceiver receiver;
     private List<Recipe> recipeList;
     private String mQuery;
     private boolean mIsFocused = true;
+    private boolean mIsConnected;
+
     private RecipesAdapter mRecipesAdapter;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putString(SEARCH_QUERY_INSTANCE, mQuery);
         outState.putBoolean(SEARCH_FOCUS_INSTANCE, mIsFocused);
+        outState.putBoolean(CONNECTIVITY_STATE_INSTANCE, mIsConnected);
         if (recipeList != null) {
             outState.putParcelableArrayList(SEARCH_RESULT_INSTANCE, new ArrayList<>(recipeList));
         }
@@ -66,22 +91,71 @@ public class SearchResultsActivity extends AppCompatActivity implements Download
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        mRecipesAdapter = new RecipesAdapter(R.layout.search_list, this, this);
-        searchResultRecyclerView.setHasFixedSize(true);
-        searchResultRecyclerView.setAdapter(mRecipesAdapter);
-
         if (savedInstanceState != null) {
             mQuery = savedInstanceState.getString(SEARCH_QUERY_INSTANCE);
             mIsFocused = savedInstanceState.getBoolean(SEARCH_FOCUS_INSTANCE);
-            recipeList = savedInstanceState.getParcelableArrayList(SEARCH_RESULT_INSTANCE);
+            mIsConnected = savedInstanceState.getBoolean(CONNECTIVITY_STATE_INSTANCE);
+            if (savedInstanceState.containsKey(SEARCH_RESULT_INSTANCE)) {
+                recipeList = savedInstanceState.getParcelableArrayList(SEARCH_RESULT_INSTANCE);
+            }
+        } else {
+            mIsConnected = NetworkState.isConnected(this);
         }
+
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (!mIsConnected && NetworkState.isConnected(context)) {
+                    Snackbar.make(searchActivityLayout, R.string.snake_message_connected, Snackbar.LENGTH_SHORT).show();
+                } else if (!NetworkState.isConnected(context)) {
+                    Snackbar.make(searchActivityLayout, R.string.snake_message_disconnected, Snackbar.LENGTH_INDEFINITE).show();
+                }
+                mIsConnected = NetworkState.isConnected(context);
+            }
+        };
+
+        registerReceiver(receiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
+        retryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mIsConnected) {
+                    showError();
+                } else {
+                    showLoading();
+                    DownloaderAsyncTask service = new DownloaderAsyncTask(mQuery, null, null, null);
+                    service.setListener(SearchResultsActivity.this);
+                    service.execute();
+                }
+            }
+        });
+
+        mRecipesAdapter = new RecipesAdapter(R.layout.search_list, this, this);
+        searchResultRecyclerView.setHasFixedSize(true);
+        searchResultRecyclerView.setAdapter(mRecipesAdapter);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         if (recipeList != null) {
-            mRecipesAdapter.setRecipeData(recipeList);
+            showData();
+        } else {
+            if (!mIsConnected) {
+                showError();
+            }
+        }
+    }
+
+    private void showError() {
+        loadingIndicatorProgressBar.setVisibility(View.INVISIBLE);
+        searchResultRecyclerView.setVisibility(View.INVISIBLE);
+        searchHintTextView.setVisibility(View.INVISIBLE);
+        offlineFrame.setVisibility(View.VISIBLE);
+        if (TextUtils.isEmpty(mQuery)) {
+            retryButton.setVisibility(View.INVISIBLE);
+        } else {
+            retryButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -96,10 +170,28 @@ public class SearchResultsActivity extends AppCompatActivity implements Download
 
             Analytics.logEventSearch(this, query);
 
-            DownloaderAsyncTask service = new DownloaderAsyncTask(query, null, null, null);
-            service.setListener(this);
-            service.execute();
+            if (!mIsConnected) {
+                showError();
+            } else {
+                showLoading();
+                DownloaderAsyncTask service = new DownloaderAsyncTask(query, null, null, null);
+                service.setListener(this);
+                service.execute();
+            }
         }
+    }
+
+    private void showLoading() {
+        loadingIndicatorProgressBar.setVisibility(View.VISIBLE);
+        searchResultRecyclerView.setVisibility(View.INVISIBLE);
+        searchHintTextView.setVisibility(View.INVISIBLE);
+        offlineFrame.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(receiver);
     }
 
     @Override
@@ -122,6 +214,7 @@ public class SearchResultsActivity extends AppCompatActivity implements Download
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                recipeList = null;
                 searchView.clearFocus();
                 return false;
             }
@@ -159,8 +252,24 @@ public class SearchResultsActivity extends AppCompatActivity implements Download
     @Override
     public void onRecipesFetched(RecipeSearchResponse recipeSearchResponse) {
         recipeList = recipeSearchResponse.recipes;
+        if (recipeList.size() == 0) {
+            searchHintTextView.setText(getString(R.string.no_search_result_message, mQuery));
+            loadingIndicatorProgressBar.setVisibility(View.INVISIBLE);
+            searchResultRecyclerView.setVisibility(View.INVISIBLE);
+            searchHintTextView.setVisibility(View.VISIBLE);
+            offlineFrame.setVisibility(View.INVISIBLE);
+        } else {
+            showData();
+            searchResultRecyclerView.smoothScrollToPosition(0);
+        }
+    }
+
+    private void showData() {
+        loadingIndicatorProgressBar.setVisibility(View.INVISIBLE);
+        searchResultRecyclerView.setVisibility(View.VISIBLE);
+        searchHintTextView.setVisibility(View.INVISIBLE);
+        offlineFrame.setVisibility(View.INVISIBLE);
         mRecipesAdapter.setRecipeData(recipeList);
-        searchResultRecyclerView.smoothScrollToPosition(0);
     }
 
     @Override

@@ -6,18 +6,25 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
+import android.support.v4.app.ShareCompat;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -25,6 +32,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.emadabel.mydishes.api.DownloaderAsyncTask;
+import com.emadabel.mydishes.api.NetworkState;
 import com.emadabel.mydishes.database.AppDatabase;
 import com.emadabel.mydishes.database.AppExecutors;
 import com.emadabel.mydishes.model.Recipe;
@@ -49,8 +57,18 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
     CoordinatorLayout detailsCoordinatorLayout;
     @BindView(R.id.details_collapsing_layout)
     CollapsingToolbarLayout detailsCollapsingLayout;
+    @BindView(R.id.appbar_layout)
+    AppBarLayout appBarLayout;
     @BindView(R.id.details_toolbar)
     Toolbar detailsToolbar;
+    @BindView(R.id.details_container)
+    NestedScrollView detailsContainer;
+    @BindView(R.id.loading_indicator_pb)
+    ProgressBar loadingIndicatorProgressBar;
+    @BindView(R.id.offline_frame)
+    FrameLayout offlineFrame;
+    @BindView(R.id.retry_button)
+    Button retryButton;
     @BindView(R.id.recipe_poster_iv)
     ImageView recipePosterImageView;
     @BindView(R.id.source_tv)
@@ -63,6 +81,7 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
     TextView publisherTextView;
     @BindView(R.id.favorites_fab)
     FloatingActionButton favoritesFab;
+    MenuItem shareMenuItem;
 
     private Recipe recipeDetails;
     private int mId = DEFAULT_ID;
@@ -121,6 +140,11 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
                     } else {
                         Log.d(TAG, "Loading data from network and isFavorite=false");
                         if (recipeDetails == null) {
+                            if (NetworkState.isConnected(DetailsActivity.this)) {
+                                loadingIndicatorProgressBar.setVisibility(View.VISIBLE);
+                            } else {
+                                offlineFrame.setVisibility(View.VISIBLE);
+                            }
                             DownloaderAsyncTask service = new DownloaderAsyncTask(null, null, null, rId);
                             service.setListener(DetailsActivity.this);
                             service.execute();
@@ -134,6 +158,7 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
     }
 
     private void initViews() {
+        appBarLayout.setExpanded(false);
         sourceTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -159,19 +184,47 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
                         if (mId == DEFAULT_ID) {
                             Log.d(TAG, "Add recipe to favorites");
                             mDb.recipeDao().insertFavoriteItem(recipeDetails);
-                            Snackbar.make(detailsCoordinatorLayout, "Recipe added to favorites", Snackbar.LENGTH_SHORT).show();
+                            Snackbar.make(detailsCoordinatorLayout, R.string.snake_message_add_fav, Snackbar.LENGTH_SHORT).show();
                         } else {
                             Log.d(TAG, "Remove recipe from favorites");
                             recipeDetails.setId(mId);
                             mDb.recipeDao().deleteFavoriteItem(recipeDetails);
                             mId = DEFAULT_ID;
-                            Snackbar.make(detailsCoordinatorLayout, "Recipe removed from favorites", Snackbar.LENGTH_SHORT).show();
+                            Snackbar.make(detailsCoordinatorLayout, R.string.snake_message_remove_fav, Snackbar.LENGTH_SHORT).show();
                         }
                         UpdatingWidgetService.startActionUpdateWidgets(getBaseContext());
                     }
                 });
             }
         });
+
+        retryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = getIntent();
+                if (intent != null && intent.hasExtra(DETAILS_RECIPE_ID_EXTRA)) {
+                    String rId = getIntent().getStringExtra(DETAILS_RECIPE_ID_EXTRA);
+                    if (NetworkState.isConnected(DetailsActivity.this)) {
+                        loadingIndicatorProgressBar.setVisibility(View.VISIBLE);
+                        offlineFrame.setVisibility(View.INVISIBLE);
+                    } else {
+                        offlineFrame.setVisibility(View.VISIBLE);
+                    }
+                    DownloaderAsyncTask service = new DownloaderAsyncTask(null, null, null, rId);
+                    service.setListener(DetailsActivity.this);
+                    service.execute();
+                }
+            }
+        });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_details, menu);
+
+        shareMenuItem = menu.findItem(R.id.action_share);
+
+        return true;
     }
 
     @Override
@@ -181,6 +234,12 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
         if (id == android.R.id.home) {
             NavUtils.navigateUpFromSameTask(this);
             return true;
+        } else if (id == R.id.action_share) {
+            ShareCompat.IntentBuilder.from(this)
+                    .setChooserTitle(R.string.share_intent_title)
+                    .setType("text/plain")
+                    .setText(getString(R.string.share_message_format, recipeDetails.getTitle(), recipeDetails.getSourceUrl()))
+                    .startChooser();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -212,6 +271,12 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
         } else {
             favoritesFab.setImageResource(R.drawable.ic_fav_on);
         }
+
+        if (shareMenuItem != null) shareMenuItem.setVisible(true);
+        loadingIndicatorProgressBar.setVisibility(View.INVISIBLE);
+        detailsContainer.setVisibility(View.VISIBLE);
+        appBarLayout.setExpanded(true, false);
+        favoritesFab.show();
 
         String posterUrl = recipe.getImageUrl();
         String publisher = recipe.getPublisher();

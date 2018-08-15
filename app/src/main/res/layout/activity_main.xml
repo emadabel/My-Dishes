@@ -36,7 +36,8 @@
             android:visibility="invisible"
             app:layoutManager="android.support.v7.widget.LinearLayoutManager"
             app:reverseLayout="false"
-            tools:listitem="@layout/recipe_list" />
+            tools:listitem="@layout/recipe_list"
+            tools:visibility="visible" />
 
         <ProgressBar
             android:id="@+id/loading_indicator_pb"
@@ -47,10 +48,10 @@
 
         <FrameLayout
             android:id="@+id/offline_frame"
-            android:layout_gravity="center"
-            android:visibility="invisible"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="invisible">
 
             <include layout="@layout/offline_layout" />
         </FrameLayout>
@@ -62,5 +63,5 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"
         ads:adSize="BANNER"
-        ads:adUnitId="ca-app-pub-3940256099942544/6300978111" />
+        ads:adUnitId="@string/admob_test_unit_id" />
 </android.support.design.widget.CoordinatorLayout>

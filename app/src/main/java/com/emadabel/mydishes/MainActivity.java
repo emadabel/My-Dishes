@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
 
     private static final String RECIPE_LIST_INSTANCE = "recipes";
     private static final String CONNECTIVITY_STATE_INSTANCE = "connectivity";
+
     @BindView(R.id.main_activity_layout)
     CoordinatorLayout mainActivityLayout;
     @BindView(R.id.main_toolbar)
@@ -50,11 +51,12 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
     @BindView(R.id.loading_indicator_pb)
     ProgressBar loadingIndicatorProgressBar;
     @BindView(R.id.offline_frame)
-    FrameLayout offline_frame;
+    FrameLayout offlineFrame;
     @BindView(R.id.retry_button)
     Button retryButton;
     @BindView(R.id.adView)
     AdView mAdView;
+
     private BroadcastReceiver receiver;
     private List<Recipe> recipeList;
     private boolean backPressedTwice;
@@ -92,12 +94,11 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (!mIsConnected && NetworkState.isConnected(context)) {
-                    Snackbar.make(mainActivityLayout, "Back online", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(mainActivityLayout, R.string.snake_message_connected, Snackbar.LENGTH_SHORT).show();
                 } else if (!NetworkState.isConnected(context)) {
-                    Snackbar.make(mainActivityLayout, "No connection", Snackbar.LENGTH_INDEFINITE).show();
+                    Snackbar.make(mainActivityLayout, R.string.snake_message_disconnected, Snackbar.LENGTH_INDEFINITE).show();
                 }
                 mIsConnected = NetworkState.isConnected(context);
-                ;
             }
         };
 
@@ -111,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
         });
 
         MobileAds.initialize(this,
-                "ca-app-pub-3940256099942544~3347511713");
+                getString(R.string.admob_test_app_id));
 
         AdRequest adRequest = new AdRequest.Builder()
                 .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
@@ -127,10 +128,7 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
     protected void onStart() {
         super.onStart();
         if (recipeList != null) {
-            loadingIndicatorProgressBar.setVisibility(View.INVISIBLE);
-            recipeListRecyclerView.setVisibility(View.VISIBLE);
-            offline_frame.setVisibility(View.INVISIBLE);
-            mRecipesAdapter.setRecipeData(recipeList);
+            showData();
         } else {
             loadDataTask();
         }
@@ -138,17 +136,18 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
 
     private void loadDataTask() {
         if (!mIsConnected) {
-            loadingIndicatorProgressBar.setVisibility(View.INVISIBLE);
-            recipeListRecyclerView.setVisibility(View.INVISIBLE);
-            offline_frame.setVisibility(View.VISIBLE);
+            loadingOrError(View.INVISIBLE, View.VISIBLE);
         } else {
-            loadingIndicatorProgressBar.setVisibility(View.VISIBLE);
-            recipeListRecyclerView.setVisibility(View.INVISIBLE);
-            offline_frame.setVisibility(View.INVISIBLE);
+            loadingOrError(View.VISIBLE, View.INVISIBLE);
             DownloaderAsyncTask service = new DownloaderAsyncTask(null, null, null, null);
             service.setListener(this);
             service.execute();
         }
+    }
+
+    private void loadingOrError(int invisible, int visible) {
+        loadingIndicatorProgressBar.setVisibility(invisible);
+        offlineFrame.setVisibility(visible);
     }
 
     @Override
@@ -162,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
         if (backPressedTwice) {
             super.onBackPressed();
         } else {
-            Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.exit_message, Toast.LENGTH_SHORT).show();
             backPressedTwice = true;
             new Handler().postDelayed(new Runnable() {
                 @Override
@@ -194,10 +193,14 @@ public class MainActivity extends AppCompatActivity implements DownloaderAsyncTa
 
     @Override
     public void onRecipesFetched(RecipeSearchResponse recipeSearchResponse) {
+        recipeList = recipeSearchResponse.recipes;
+        showData();
+    }
+
+    private void showData() {
         loadingIndicatorProgressBar.setVisibility(View.INVISIBLE);
         recipeListRecyclerView.setVisibility(View.VISIBLE);
-        offline_frame.setVisibility(View.INVISIBLE);
-        recipeList = recipeSearchResponse.recipes;
+        offlineFrame.setVisibility(View.INVISIBLE);
         mRecipesAdapter.setRecipeData(recipeList);
     }
 
