@@ -30,8 +30,8 @@
             android:id="@+id/recipe_list_rv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginEnd="@dimen/secondary_horizontal_margin"
+            android:layout_marginStart="@dimen/secondary_horizontal_margin"
             android:orientation="vertical"
             android:visibility="invisible"
             app:layoutManager="android.support.v7.widget.LinearLayoutManager"
@@ -62,6 +62,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"
-        ads:adSize="BANNER"
+        ads:adSize="@string/admob_size"
         ads:adUnitId="@string/admob_test_unit_id" />
 </android.support.design.widget.CoordinatorLayout>

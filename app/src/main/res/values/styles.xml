@@ -16,4 +16,64 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="titleStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textColor">@color/colorAccent</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold|italic</item>
+    </style>
+
+    <style name="linkStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/link_background</item>
+        <item name="android:padding">@dimen/small_margin</item>
+        <item name="android:textColor">@color/cardview_light_background</item>
+    </style>
+
+    <style name="hintMessageStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">@dimen/big_margin</item>
+        <item name="android:padding">@dimen/midi_margin</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="widgetMessageStyle" parent="hintMessageStyle">
+        <item name="android:layout_centerInParent">true</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="widgetTitleStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold|italic</item>
+    </style>
+
+    <style name="ingredientItemStyle">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Body1</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="offlineMessageStyle">
+        <item name="android:textAlignment">center</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Body2</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="recipePosterLandStyle">
+        <item name="android:layout_width">@dimen/landPosterWidth</item>
+        <item name="android:layout_height">@dimen/landPosterHeight</item>
+        <item name="android:adjustViewBounds">true</item>
+        <item name="android:scaleType">centerCrop</item>
+    </style>
+
 </resources>

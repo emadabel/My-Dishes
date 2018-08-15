@@ -45,7 +45,7 @@ public class UpdatingWidgetService extends IntentService {
 
                         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(UpdatingWidgetService.this);
                         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(UpdatingWidgetService.this, FavoritesWidgetProvider.class));
-                        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.appwidget_favorits_lv);
+                        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.appwidget_favorites_lv);
                         FavoritesWidgetProvider.updateRecipeWidgets(UpdatingWidgetService.this, appWidgetManager, recipeList, appWidgetIds);
                     }
                 });

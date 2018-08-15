@@ -31,7 +31,7 @@ public class FavoritesWidgetProvider extends AppWidgetProvider {
             views.setViewVisibility(R.id.empty_view, View.GONE);
             views.setViewVisibility(R.id.widget_container, View.VISIBLE);
             Intent intent = new Intent(context, ListViewWidgetService.class);
-            views.setRemoteAdapter(R.id.appwidget_favorits_lv, intent);
+            views.setRemoteAdapter(R.id.appwidget_favorites_lv, intent);
 
             Intent favoritesIntent = new Intent(context, FavoritesActivity.class);
 
@@ -52,7 +52,7 @@ public class FavoritesWidgetProvider extends AppWidgetProvider {
                             // followed by DetailsActivity itself
                             .addNextIntentWithParentStack(detailsIntent)
                             .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-            views.setPendingIntentTemplate(R.id.appwidget_favorits_lv, detailsPendingIntent);
+            views.setPendingIntentTemplate(R.id.appwidget_favorites_lv, detailsPendingIntent);
         } else {
             views.setViewVisibility(R.id.empty_view, View.VISIBLE);
             views.setViewVisibility(R.id.widget_container, View.GONE);

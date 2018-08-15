@@ -7,13 +7,25 @@
     <string name="snake_message_connected">Back online</string>
     <string name="exit_message">Press back again to exit</string>
     <string name="appwidget_text">Favorites list</string>
-    <string name="add_widget">Add widget</string>
     <string name="admob_test_app_id">ca-app-pub-3940256099942544~3347511713</string>
     <string name="admob_test_unit_id">ca-app-pub-3940256099942544/6300978111</string>
     <string name="no_search_result_message">Sorry, we couldn\'t find any content for \"%1$s\"</string>
-    <string name="search_default_hint_message">Type a Recipe name or Ingredients saparated with comma</string>
+    <string name="search_default_hint_message">Type a Recipe name or Ingredients separated with comma</string>
     <string name="snake_message_add_fav">Recipe added to favorites</string>
     <string name="snake_message_remove_fav">Recipe removed from favorites</string>
     <string name="share_intent_title">Share Recipe</string>
     <string name="share_message_format">Recipe name:\n%1$s\n\nRecipe source:\n%2$s\n\nThis data fetched from Food2Fork Api\nAnd this message sent from My Dishes</string>
+    <string name="ingredients_title">Ingredients</string>
+    <string name="link_instructions_button">Instructions</string>
+    <string name="recipe_poster">Recipe Image</string>
+    <string name="no_favorites_message">It seems you do not have any favorites.</string>
+    <string name="admob_size">BANNER</string>
+    <string name="widget_button_launch">launch</string>
+    <string name="list_ingredient_item">Ingredient item</string>
+    <string name="offlineMessage">Connect to the Internet</string>
+    <string name="offlineSubMessage">You\'re offline, check you connection.</string>
+    <string name="retryButton">Retry</string>
+    <string name="fabButtonDescription">Add or Remove recipe from the favorite list</string>
+    <string name="action_share">Share</string>
+    <string name="action_favorites">Favorites</string>
 </resources>

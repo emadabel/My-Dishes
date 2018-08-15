@@ -27,13 +27,9 @@
 
         <TextView
             android:id="@+id/search_hint_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/hintMessageStyle"
             android:layout_gravity="center_horizontal"
-            android:layout_margin="32dp"
-            android:padding="16dp"
-            android:text="@string/search_default_hint_message"
-            android:textAlignment="center" />
+            android:text="@string/search_default_hint_message" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/search_result_rv"

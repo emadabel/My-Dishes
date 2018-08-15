@@ -13,7 +13,7 @@
         android:id="@+id/action_favorites"
         android:icon="@drawable/ic_menu_favorite"
         android:orderInCategory="200"
-        android:title="Favorites"
+        android:title="@string/action_favorites"
         app:showAsAction="ifRoom" />
 
 </menu>

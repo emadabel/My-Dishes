@@ -29,8 +29,8 @@
             android:id="@+id/favorites_list_rv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginEnd="@dimen/secondary_horizontal_margin"
+            android:layout_marginStart="@dimen/secondary_horizontal_margin"
             android:orientation="vertical"
             android:visibility="invisible"
             app:layoutManager="android.support.v7.widget.LinearLayoutManager"
@@ -39,10 +39,9 @@
 
         <TextView
             android:id="@+id/no_favorite_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/hintMessageStyle"
             android:layout_gravity="center"
-            android:text="It seems you do not have any favorites."
+            android:text="@string/no_favorites_message"
             android:visibility="visible" />
     </FrameLayout>
 </android.support.design.widget.CoordinatorLayout>
