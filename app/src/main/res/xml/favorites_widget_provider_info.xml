@@ -2,7 +2,7 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:initialKeyguardLayout="@layout/favorites_widget_provider"
     android:initialLayout="@layout/favorites_widget_provider"
-    android:minHeight="180dp"
+    android:minHeight="110dp"
     android:minWidth="180dp"
     android:previewImage="@mipmap/ic_launcher_round"
     android:resizeMode="horizontal|vertical"

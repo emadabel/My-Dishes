@@ -42,11 +42,17 @@
         <item name="android:textAlignment">center</item>
     </style>
 
-    <style name="widgetMessageStyle" parent="hintMessageStyle">
-        <item name="android:layout_centerInParent">true</item>
+    <style name="widgetMessageStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">@dimen/big_margin</item>
+        <item name="android:layout_marginEnd">@dimen/big_margin</item>
+        <item name="android:paddingStart">@dimen/midi_margin</item>
+        <item name="android:paddingEnd">@dimen/midi_margin</item>
         <item name="android:textColor">@color/colorWhite</item>
         <item name="android:textSize">20sp</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:textAlignment">center</item>
     </style>
 
     <style name="widgetTitleStyle">
