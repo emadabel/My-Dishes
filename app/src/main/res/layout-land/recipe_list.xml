@@ -16,8 +16,7 @@
         <ImageView
             android:id="@+id/recipe_poster_iv"
             style="@style/recipePosterLandStyle"
-            android:contentDescription="@string/recipe_poster"
-            tools:src="@drawable/ic_launcher_background" />
+            android:contentDescription="@string/recipe_poster" />
 
         <TextView
             android:id="@+id/recipe_title_tv"

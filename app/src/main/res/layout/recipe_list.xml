@@ -19,8 +19,7 @@
             android:layout_height="@dimen/mainPosterHeight"
             android:adjustViewBounds="true"
             android:contentDescription="@string/recipe_poster"
-            android:scaleType="centerCrop"
-            tools:src="@drawable/ic_launcher_background" />
+            android:scaleType="centerCrop" />
 
         <RatingBar
             android:id="@+id/ratingBar"
