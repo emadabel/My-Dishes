@@ -223,6 +223,7 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
         getMenuInflater().inflate(R.menu.menu_details, menu);
 
         shareMenuItem = menu.findItem(R.id.action_share);
+        populateUi(recipeDetails);
 
         return true;
     }
@@ -272,7 +273,9 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
             favoritesFab.setImageResource(R.drawable.ic_fav_on);
         }
 
-        if (shareMenuItem != null) shareMenuItem.setVisible(true);
+        if (shareMenuItem != null) {
+            shareMenuItem.setVisible(true);
+        }
         loadingIndicatorProgressBar.setVisibility(View.INVISIBLE);
         detailsContainer.setVisibility(View.VISIBLE);
         appBarLayout.setExpanded(true, false);
