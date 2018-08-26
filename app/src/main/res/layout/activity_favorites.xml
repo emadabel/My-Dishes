@@ -5,7 +5,7 @@
     android:id="@+id/favorites_activity_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".FavoritesActivity">
+    tools:context=".ui.activity.favorite.FavoritesActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"

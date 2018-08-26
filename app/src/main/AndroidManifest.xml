@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.activity.main.MainActivity"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.Launcher">
             <intent-filter>
@@ -23,10 +23,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SearchResultsActivity"
+            android:name=".ui.activity.search.SearchResultsActivity"
             android:configChanges="orientation|keyboard|keyboardHidden"
             android:launchMode="singleTop"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".ui.activity.main.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -37,27 +37,27 @@
                 android:resource="@xml/searchable" />
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".ui.activity.main.MainActivity" />
         </activity>
         <activity
-            android:name=".DetailsActivity"
-            android:parentActivityName=".FavoritesActivity"
+            android:name=".ui.activity.detail.DetailsActivity"
+            android:parentActivityName=".ui.activity.favorite.FavoritesActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".FavoritesActivity" />
+                android:value=".ui.activity.favorite.FavoritesActivity" />
         </activity>
         <activity
-            android:name=".FavoritesActivity"
+            android:name=".ui.activity.favorite.FavoritesActivity"
             android:label="@string/favorites_title"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".ui.activity.main.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".ui.activity.main.MainActivity" />
         </activity>
 
-        <receiver android:name=".widget.FavoritesWidgetProvider">
+        <receiver android:name=".ui.widget.FavoritesWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -68,10 +68,10 @@
         </receiver>
 
         <service
-            android:name=".widget.ListViewWidgetService"
+            android:name=".ui.widget.ListViewWidgetService"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
 
-        <service android:name=".widget.UpdatingWidgetService" />
+        <service android:name=".ui.widget.UpdatingWidgetService" />
     </application>
 
 </manifest>
