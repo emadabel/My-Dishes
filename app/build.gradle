@@ -39,28 +39,39 @@ dependencies {
     implementation "com.android.support:design:$supportLibVersion"
     implementation "com.android.support:recyclerview-v7:$supportLibVersion"
     implementation "com.android.support:cardview-v7:$supportLibVersion"
-    implementation "com.android.support:customtabs:$supportLibVersion"
     // to fix conflict with AdMob
+    implementation "com.android.support:customtabs:$supportLibVersion"
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     implementation 'com.github.paolorotolo:expandableheightlistview:1.0.0'
+
     // retrofit dependencies
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+
     // butterknife dependencies
     implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+
     // glide
     implementation 'com.github.bumptech.glide:glide:4.7.1'
+
     // room dependencies
     implementation "android.arch.persistence.room:runtime:$room_version"
     annotationProcessor "android.arch.persistence.room:compiler:$room_version"
+
     // ViewModel and LiveData
     implementation "android.arch.lifecycle:extensions:$lifecycle_version"
     annotationProcessor "android.arch.lifecycle:compiler:$lifecycle_version"
+
     // Google Play AdMob
     implementation 'com.google.android.gms:play-services-ads:15.0.1'
+
     // Firebase Analytics
-    implementation 'com.google.firebase:firebase-core:16.0.1'
+    implementation 'com.google.firebase:firebase-core:16.0.3'
+
+    // Timber logging library
+    implementation 'com.jakewharton.timber:timber:4.7.1'
+
     // test dependencies
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
