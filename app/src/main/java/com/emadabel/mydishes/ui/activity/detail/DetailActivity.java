@@ -16,7 +16,6 @@ import android.support.v4.app.ShareCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,13 +39,14 @@ import com.emadabel.mydishes.data.model.Recipe;
 import com.emadabel.mydishes.data.model.RecipeGetResponse;
 import com.emadabel.mydishes.data.model.RecipeSearchResponse;
 import com.emadabel.mydishes.ui.widget.UpdatingWidgetService;
+import com.emadabel.mydishes.utilities.InjectorUtils;
 import com.github.paolorotolo.expandableheightlistview.ExpandableHeightListView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-public class DetailsActivity extends AppCompatActivity implements DownloaderAsyncTask.DownloaderCallback {
+public class DetailActivity extends AppCompatActivity implements DownloaderAsyncTask.DownloaderCallback {
 
     public static final String DETAILS_RECIPE_ID_EXTRA = "recipe_id";
     public static final String DETAILS_RECIPE_TITLE_EXTRA = "recipe_title";
@@ -128,8 +128,8 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
 
             detailsCollapsingLayout.setTitle(title);
 
-            DetailsViewModelFactory factory = new DetailsViewModelFactory(mDb, rId);
-            DetailsViewModel viewModel = ViewModelProviders.of(this, factory).get(DetailsViewModel.class);
+            DetailViewModelFactory factory = InjectorUtils.provideDetailViewModelFactory(this, rId);
+            DetailViewModel viewModel = ViewModelProviders.of(this, factory).get(DetailViewModel.class);
             viewModel.getRecipe().observe(this, new Observer<Recipe>() {
                 @Override
                 public void onChanged(@Nullable Recipe recipe) {
@@ -141,13 +141,13 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
                     } else {
                         Timber.d("Loading data from network and isFavorite=false");
                         if (recipeDetails == null) {
-                            if (NetworkState.isConnected(DetailsActivity.this)) {
+                            if (NetworkState.isConnected(DetailActivity.this)) {
                                 loadingIndicatorProgressBar.setVisibility(View.VISIBLE);
                             } else {
                                 offlineFrame.setVisibility(View.VISIBLE);
                             }
                             DownloaderAsyncTask service = new DownloaderAsyncTask(null, null, null, rId);
-                            service.setListener(DetailsActivity.this);
+                            service.setListener(DetailActivity.this);
                             service.execute();
                         } else {
                             populateUi(recipeDetails);
@@ -205,14 +205,14 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
                 Intent intent = getIntent();
                 if (intent != null && intent.hasExtra(DETAILS_RECIPE_ID_EXTRA)) {
                     String rId = getIntent().getStringExtra(DETAILS_RECIPE_ID_EXTRA);
-                    if (NetworkState.isConnected(DetailsActivity.this)) {
+                    if (NetworkState.isConnected(DetailActivity.this)) {
                         loadingIndicatorProgressBar.setVisibility(View.VISIBLE);
                         offlineFrame.setVisibility(View.INVISIBLE);
                     } else {
                         offlineFrame.setVisibility(View.VISIBLE);
                     }
                     DownloaderAsyncTask service = new DownloaderAsyncTask(null, null, null, rId);
-                    service.setListener(DetailsActivity.this);
+                    service.setListener(DetailActivity.this);
                     service.execute();
                 }
             }

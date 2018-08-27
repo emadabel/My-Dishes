@@ -9,7 +9,7 @@ import android.support.v4.app.TaskStackBuilder;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import com.emadabel.mydishes.ui.activity.detail.DetailsActivity;
+import com.emadabel.mydishes.ui.activity.detail.DetailActivity;
 import com.emadabel.mydishes.ui.activity.favorite.FavoritesActivity;
 import com.emadabel.mydishes.ui.activity.main.MainActivity;
 import com.emadabel.mydishes.R;
@@ -44,12 +44,12 @@ public class FavoritesWidgetProvider extends AppWidgetProvider {
 
             views.setOnClickPendingIntent(R.id.appwidget_title_tv, favoritesPendingIntent);
 
-            Intent detailsIntent = new Intent(context, DetailsActivity.class);
+            Intent detailsIntent = new Intent(context, DetailActivity.class);
             //PendingIntent detailsPendingIntent = PendingIntent.getActivity(context, 0, detailsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             PendingIntent detailsPendingIntent =
                     TaskStackBuilder.create(context)
-                            // add all of DetailsActivity's parents to the stack,
-                            // followed by DetailsActivity itself
+                            // add all of DetailActivity's parents to the stack,
+                            // followed by DetailActivity itself
                             .addNextIntentWithParentStack(detailsIntent)
                             .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
             views.setPendingIntentTemplate(R.id.appwidget_favorites_lv, detailsPendingIntent);

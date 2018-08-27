@@ -41,7 +41,7 @@
                 android:value=".ui.activity.main.MainActivity" />
         </activity>
         <activity
-            android:name=".ui.activity.detail.DetailsActivity"
+            android:name=".ui.activity.detail.DetailActivity"
             android:parentActivityName=".ui.activity.favorite.FavoritesActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data

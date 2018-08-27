@@ -21,7 +21,7 @@ import com.emadabel.mydishes.ui.adapter.RecipesAdapter;
 import com.emadabel.mydishes.data.database.AppDatabase;
 import com.emadabel.mydishes.AppExecutors;
 import com.emadabel.mydishes.data.model.Recipe;
-import com.emadabel.mydishes.ui.activity.detail.DetailsActivity;
+import com.emadabel.mydishes.ui.activity.detail.DetailActivity;
 import com.emadabel.mydishes.ui.widget.UpdatingWidgetService;
 
 import java.util.List;
@@ -122,9 +122,9 @@ public class FavoritesActivity extends AppCompatActivity implements RecipesAdapt
 
     @Override
     public void onClick(String rId, String recipeTitle) {
-        Intent intent = new Intent(FavoritesActivity.this, DetailsActivity.class);
-        intent.putExtra(DetailsActivity.DETAILS_RECIPE_ID_EXTRA, rId);
-        intent.putExtra(DetailsActivity.DETAILS_RECIPE_TITLE_EXTRA, recipeTitle);
+        Intent intent = new Intent(FavoritesActivity.this, DetailActivity.class);
+        intent.putExtra(DetailActivity.DETAILS_RECIPE_ID_EXTRA, rId);
+        intent.putExtra(DetailActivity.DETAILS_RECIPE_TITLE_EXTRA, recipeTitle);
         startActivity(intent);
     }
 }

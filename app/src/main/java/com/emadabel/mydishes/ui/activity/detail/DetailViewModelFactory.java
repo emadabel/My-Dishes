@@ -4,21 +4,21 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
-import com.emadabel.mydishes.data.database.AppDatabase;
+import com.emadabel.mydishes.data.MyDishesRepository;
 
-public class DetailsViewModelFactory extends ViewModelProvider.NewInstanceFactory {
+public class DetailViewModelFactory extends ViewModelProvider.NewInstanceFactory {
 
-    private final AppDatabase mDb;
+    private final MyDishesRepository mRepository;
     private final String mRecipeId;
 
-    public DetailsViewModelFactory(AppDatabase database, String recipeId) {
-        this.mDb = database;
+    public DetailViewModelFactory(MyDishesRepository repository, String recipeId) {
+        this.mRepository = repository;
         this.mRecipeId = recipeId;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new DetailsViewModel(mDb, mRecipeId);
+        return (T) new DetailViewModel(mRepository, mRecipeId);
     }
 }

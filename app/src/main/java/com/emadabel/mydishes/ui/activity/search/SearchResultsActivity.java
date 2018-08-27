@@ -23,6 +23,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.emadabel.mydishes.R;
+import com.emadabel.mydishes.ui.activity.detail.DetailActivity;
 import com.emadabel.mydishes.ui.adapter.RecipesAdapter;
 import com.emadabel.mydishes.data.network.DownloaderAsyncTask;
 import com.emadabel.mydishes.data.network.NetworkState;
@@ -30,7 +31,6 @@ import com.emadabel.mydishes.firebase.Analytics;
 import com.emadabel.mydishes.data.model.Recipe;
 import com.emadabel.mydishes.data.model.RecipeGetResponse;
 import com.emadabel.mydishes.data.model.RecipeSearchResponse;
-import com.emadabel.mydishes.ui.activity.detail.DetailsActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -281,9 +281,9 @@ public class SearchResultsActivity extends AppCompatActivity implements Download
 
     @Override
     public void onClick(String rId, String recipeTitle) {
-        Intent intent = new Intent(SearchResultsActivity.this, DetailsActivity.class);
-        intent.putExtra(DetailsActivity.DETAILS_RECIPE_ID_EXTRA, rId);
-        intent.putExtra(DetailsActivity.DETAILS_RECIPE_TITLE_EXTRA, recipeTitle);
+        Intent intent = new Intent(SearchResultsActivity.this, DetailActivity.class);
+        intent.putExtra(DetailActivity.DETAILS_RECIPE_ID_EXTRA, rId);
+        intent.putExtra(DetailActivity.DETAILS_RECIPE_TITLE_EXTRA, recipeTitle);
         startActivity(intent);
     }
 }

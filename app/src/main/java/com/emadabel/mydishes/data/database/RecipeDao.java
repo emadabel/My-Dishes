@@ -28,7 +28,7 @@ public interface RecipeDao {
     void deleteFavoriteItem(Recipe recipe);
 
     @Query("SELECT * FROM favorites WHERE recipeId = :rId")
-    LiveData<Recipe> loadRecipeById(String rId);
+    LiveData<Recipe> getRecipeById(String rId);
 
     @Query("SELECT * FROM favorites")
     List<Recipe> loadFavoritesForWidget();

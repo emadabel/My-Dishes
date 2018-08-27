@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
-import com.emadabel.mydishes.ui.activity.detail.DetailsActivity;
+import com.emadabel.mydishes.ui.activity.detail.DetailActivity;
 import com.emadabel.mydishes.R;
 import com.emadabel.mydishes.data.database.AppDatabase;
 import com.emadabel.mydishes.data.model.Recipe;
@@ -56,8 +56,8 @@ public class ListViewWidgetService extends RemoteViewsService {
             views.setTextViewText(R.id.recipe_name_tv, recipeList.get(position).getTitle());
 
             Intent fillIntent = new Intent();
-            fillIntent.putExtra(DetailsActivity.DETAILS_RECIPE_ID_EXTRA, recipeList.get(position).getRecipeId());
-            fillIntent.putExtra(DetailsActivity.DETAILS_RECIPE_TITLE_EXTRA, recipeList.get(position).getTitle());
+            fillIntent.putExtra(DetailActivity.DETAILS_RECIPE_ID_EXTRA, recipeList.get(position).getRecipeId());
+            fillIntent.putExtra(DetailActivity.DETAILS_RECIPE_TITLE_EXTRA, recipeList.get(position).getTitle());
             views.setOnClickFillInIntent(R.id.parentView, fillIntent);
 
             return views;
