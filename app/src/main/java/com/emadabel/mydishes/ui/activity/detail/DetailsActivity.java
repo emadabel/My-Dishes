@@ -44,6 +44,7 @@ import com.github.paolorotolo.expandableheightlistview.ExpandableHeightListView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 public class DetailsActivity extends AppCompatActivity implements DownloaderAsyncTask.DownloaderCallback {
 
@@ -51,7 +52,6 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
     public static final String DETAILS_RECIPE_TITLE_EXTRA = "recipe_title";
     public static final String DETAILS_ID_INSTANCE = "id";
     public static final String DETAILS_RECIPE_INSTANCE = "recipe";
-    private static final String TAG = "DetailsActivity";
     private static final int DEFAULT_ID = -1;
 
     @BindView(R.id.details_coordinator_layout)
@@ -134,12 +134,12 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
                 @Override
                 public void onChanged(@Nullable Recipe recipe) {
                     if (recipe != null) {
-                        Log.d(TAG, "loading data from favorites and isFavorite=true");
+                        Timber.d("loading data from favorites and isFavorite=true");
                         recipeDetails = recipe;
                         mId = recipe.getId();
                         populateUi(recipe);
                     } else {
-                        Log.d(TAG, "Loading data from network and isFavorite=false");
+                        Timber.d("Loading data from network and isFavorite=false");
                         if (recipeDetails == null) {
                             if (NetworkState.isConnected(DetailsActivity.this)) {
                                 loadingIndicatorProgressBar.setVisibility(View.VISIBLE);
@@ -183,11 +183,11 @@ public class DetailsActivity extends AppCompatActivity implements DownloaderAsyn
                     @Override
                     public void run() {
                         if (mId == DEFAULT_ID) {
-                            Log.d(TAG, "Add recipe to favorites");
+                            Timber.d("Add recipe to favorites");
                             mDb.recipeDao().insertFavoriteItem(recipeDetails);
                             Snackbar.make(detailsCoordinatorLayout, R.string.snake_message_add_fav, Snackbar.LENGTH_SHORT).show();
                         } else {
-                            Log.d(TAG, "Remove recipe from favorites");
+                            Timber.d("Remove recipe from favorites");
                             recipeDetails.setId(mId);
                             mDb.recipeDao().deleteFavoriteItem(recipeDetails);
                             mId = DEFAULT_ID;

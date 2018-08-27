@@ -2,6 +2,8 @@ package com.emadabel.mydishes.utilities;
 
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,11 +22,11 @@ public class ReleaseTree extends Timber.Tree {
             return;
         }
 
-        // TODO: log all messages
+        Crashlytics.log(priority, tag, message);
 
         if (t != null) {
             if (priority == Log.ERROR || priority == Log.WARN) {
-                // TODO: log throwable
+                Crashlytics.logException(t);
             }
         }
 
